@@ -1,0 +1,125 @@
+<mat-tab-group>
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <mat-icon>book</mat-icon> ZOEKEN IN DE CATALOGUS </ng-template>
+    <form novalidate class="content content-test-form" #form="ngForm" (ngSubmit)="form.valid && submitForm(form)">
+      <section class="row">
+        <div class="col">
+          <mat-input-container>
+            <input matInput matKeyboard placeholder="Zoekterm" name="zoekterm" [(ngModel)]="zoekValue" (enterClick)="submitForm(form)">
+          </mat-input-container>
+        </div>
+      </section>
+      <section class="row">
+        <button mat-raised-button type="submit" aria-label="Submit form">
+          ZOEKEN
+        </button>
+      </section>
+    </form>
+    <div>
+      <div *ngIf="resultaten.length > 0 as value; else noResult">
+        <!-- <div class="row">-->
+        <ngx-masonry [options]="{ transitionDuration: '1s' }" [useImagesLoaded]="true">
+          <ngxMasonryItem class="masonry-item" *ngFor="let resultaat of resultaten">
+            <!--  <div class="col">-->
+            <mat-card class="card">
+              <mat-card-header>
+                <mat-card-title class="title">{{resultaat.titles[0].title[0]._}}</mat-card-title>
+                <mat-card-subtitle class="subtitle" *ngIf="isUndefined(resultaat.authors) as value; else elseBlock">
+                </mat-card-subtitle>
+                <ng-template #elseBlock>
+                  <mat-card-subtitle>
+                    {{getAuthor(resultaat)}}
+                  </mat-card-subtitle>
+                </ng-template>
+              </mat-card-header>
+              <img mat-card-image src="{{getUrl(resultaat)}}" alt="CoverImage">
+              <mat-card-content>
+                {{resultaat.summaries? resultaat.summaries[0].summary[0]._ : ""}}
+              </mat-card-content>
+              <mat-card-actions>
+                <!-- <a href="{{resultaat['detail-page']}}" target="_blank" mat-button>MEER INFO</a> -->
+                <button (click)="openModal('custom-modal',resultaat)" mat-button>BESCHIKBAARHEID</button>
+                <!-- <p>{{getAvailability(resultaat.frabl[0]._)}}</p> -->
+              </mat-card-actions>
+              <!-- <div *ngIf="isArray(resultaat.types.type) as value; else elseBlockType">
+                  <mat-chip-list>
+                    <mat-chip *ngFor="let t of resultaat.types.type" selected="true" color="warn">{{t}}</mat-chip>
+                  </mat-chip-list>
+                </div>
+                <ng-template #elseBlockType>
+                  <div>
+                    <mat-chip-list>
+                      <mat-chip selected="true" color="warn"> {{resultaat.types.type}}
+                      </mat-chip>
+                    </mat-chip-list>
+                  </div>
+                </ng-template>-->
+            </mat-card>
+            <!--  </div>-->
+          </ngxMasonryItem>
+        </ngx-masonry>
+        <!-- </div>-->
+        <modal id="custom-modal">
+          <div class="modal">
+            <div class="modal-body">
+              <!-- <iframe id="frame" frameborder="0" width="100%" height="100%"></iframe> -->
+              <div *ngIf="boekResultaat">
+                <p class="mat-tab-label">{{resultaat?.titles[0].title[0]._}} - {{getAuthor(resultaat)}}
+                </p>
+                <mat-table [dataSource]="boekResultaat" class="mat-elevation-z8">
+                  <ng-container matColumnDef="check">
+                    <mat-header-cell *matHeaderCellDef> </mat-header-cell>
+                    <mat-cell *matCellDef="let element">
+                      <ng-template [ngIf]="getIcon(element.status[0])" [ngIfElse]="loggedOut">
+                        <mat-icon class="check">check</mat-icon>
+                      </ng-template>
+                      <ng-template #loggedOut>
+                        <mat-icon class="close">close</mat-icon>
+                      </ng-template>
+                    </mat-cell>
+                  </ng-container>
+                  <ng-container matColumnDef="subloc">
+                    <mat-header-cell *matHeaderCellDef> Plaats </mat-header-cell>
+                    <mat-cell *matCellDef="let element"> {{element.subloc[0]}} </mat-cell>
+                  </ng-container>
+
+                  <ng-container matColumnDef="shelfmark">
+                    <mat-header-cell *matHeaderCellDef> </mat-header-cell>
+                    <mat-cell *matCellDef="let element"> {{element.shelfmark[0]}} </mat-cell>
+                  </ng-container>
+
+                  <ng-container matColumnDef="publication">
+                    <mat-header-cell *matHeaderCellDef> Uitgave </mat-header-cell>
+                    <mat-cell *matCellDef="let element"> {{element.publication[0]._}} </mat-cell>
+                  </ng-container>
+
+                  <ng-container matColumnDef="status">
+                    <mat-header-cell *matHeaderCellDef> Beschikbaarheid </mat-header-cell>
+                    <mat-cell *matCellDef="let element">{{element.status[0]}}</mat-cell>
+                  </ng-container>
+
+                  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                  <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+                </mat-table>
+              </div>
+              <button (click)="closeModal('custom-modal');" id="close">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          </div>
+          <div class="modal-background"></div>
+        </modal>
+      </div>
+      <ng-template #noResult>
+        <div *ngIf="!first">
+          <img class="noresult" src="assets/noresultTextDown.png">
+        </div>
+      </ng-template>
+    </div>
+    <div>
+      <div>
+      </div>
+    </div>
+  </mat-tab>
+</mat-tab-group>
